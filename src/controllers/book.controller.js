@@ -24,7 +24,7 @@ export const addBook = async(req, res) => {
         })
 
         res.status(201).json({
-            status: false,
+            status: true,
             message: "book published"
         })
 
