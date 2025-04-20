@@ -27,8 +27,23 @@ export const updateAvatar = async(req, res) => {
             await cloudinary.uploader.destroy(publicId)
         }
 
-       const uploadResponse = await cloudinary.uploader.upload(avatarBase64);
-       const avatar = uploadResponse.secure_url
+         let uploadResponse;
+                try {
+                    uploadResponse = await cloudinary.uploader.upload(avatarBase64, {
+                        folder: "users-avatar",
+                        resource_type: "image"
+                    });
+                } catch (uploadError) {
+                    console.error("Cloudinary upload error:", uploadError);
+                    return res.status(500).json({
+                        status: false,
+                        message: "Failed to upload image"
+                    });
+                }
+          
+
+
+       const avatar = uploadResponse.secure_url 
 
         const user = await userModel.findByIdAndUpdate(
             userId, 
