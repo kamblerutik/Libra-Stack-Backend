@@ -1,5 +1,6 @@
 import userModel from "../models/user.model.js";
 import cloudinary from "../lib/cloudinary.js"
+import bookModel from "../models/book.model.js";
 
 export const getUser = async(req, res) => {
     try {
@@ -27,7 +28,6 @@ export const updateAvatar = async(req, res) => {
             await cloudinary.uploader.destroy(publicId)
         }
 
-<<<<<<< HEAD
          let uploadResponse;
                 try {
                     uploadResponse = await cloudinary.uploader.upload(avatarBase64, {
@@ -45,22 +45,6 @@ export const updateAvatar = async(req, res) => {
 
 
        const avatar = uploadResponse.secure_url 
-=======
-      let uploadResponse;
-        try {
-            uploadResponse = await cloudinary.uploader.upload(avatarBase64, {
-                folder: "users-avatars",
-                resource_type: "image"
-            });
-        } catch (uploadError) {
-            console.error("Cloudinary upload error:", uploadError);
-            return res.status(500).json({
-                status: false,
-                message: "Failed to upload image"
-            });
-        }
-       const avatar = uploadResponse.secure_url
->>>>>>> 590df656dddeca0064ce71052da599431a16b2df
 
         const user = await userModel.findByIdAndUpdate(
             userId, 
@@ -86,6 +70,46 @@ export const updateAvatar = async(req, res) => {
 
     } catch (error) {
         console.log(error);
+        
+    }
+}
+
+
+
+export const getPosts = async(req, res) => {
+    try {
+        const user = req.user
+        const publisher = user._id
+        const page = req.query.page;
+        const limit = req.query.limit || 1;
+        const skip = (page - 1) * limit
+        
+        const books = await bookModel.find({publisher})
+        .skip(skip)
+        .limit(limit)
+        .populate("publisher", "username avatar")
+
+        if (!books) {
+            res.status(404).json({
+                status: false ,
+                message: "Nothing is here"
+            })
+        }
+
+        const totalBooks = await bookModel.countDocuments()
+
+        res.status(201).json({
+            status: true,
+            books,
+            totalPages: Math.ceil(totalBooks / limit)
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            status: false,
+            message: `Server error: ${error.message}`
+        })
         
     }
 }
