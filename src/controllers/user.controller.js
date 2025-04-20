@@ -29,7 +29,7 @@ export const updateAvatar = async(req, res) => {
 
       let uploadResponse;
         try {
-            uploadResponse = await cloudinary.uploader.upload(poster, {
+            uploadResponse = await cloudinary.uploader.upload(avatarBase64, {
                 folder: "users-avatars",
                 resource_type: "image"
             });
